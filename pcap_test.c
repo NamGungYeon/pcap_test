@@ -112,8 +112,8 @@ printf("%-3s\t%-17s\t%-17s\t%-15s\t%-15s\t%-10s\t%-10s\t%-10s\n","num","eth_smac
 			port+=(int)*(packet+i);
 		printf("%-10d",port);
 		j=38;
-		//for(i=j; i<(header->len); i++)
-		for(i=j; i<10; i++)
+		for(i=j; i<(header->len); i++)
+		//for(i=j; i<10; i++)
 			printf("%c", *(packet+i));
 		printf("\n");
 		/* And close the session */
