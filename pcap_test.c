@@ -1,6 +1,18 @@
 #include <pcap.h>
-	 #include <stdio.h>
+#include <stdio.h>
+#include <string.h>
 
+typedef struct data
+{
+	char eth_smac[20];
+	char eth_dmac[20];
+	char ip_sip[20];
+	char ip_dip[20];
+	char tcp_sport[20];
+	char tcp_dport[20];
+	char data[200];
+
+}data;
 	 int main(int argc, char *argv[])
 	 {
 		pcap_t *handle;			/* Session handle */
@@ -12,7 +24,10 @@
 		bpf_u_int32 net;		/* Our IP */
 		struct pcap_pkthdr *header;	/* The header that pcap gives us */
 		const u_char *packet;		/* The actual packet */
-
+		int Res;
+		
+		int cnt=1;
+		char dot='.';
 		/* Define the device */
 		dev = pcap_lookupdev(errbuf);
 		if (dev == NULL) {
@@ -40,7 +55,9 @@
 			fprintf(stderr, "Couldn't install filter %s: %s\n", filter_exp, pcap_geterr(handle));
 			return(2);
 		}
-		/* Grab a packet */
+printf("%-3s\t%-17s\t%-17s\t%-15s\t%-15s\t%-10s\t%-10s\t%-10s\n","num","eth_smac","eth_dmac","ip_sip","ip_dip","tcp_sport","tcp_dport","data");
+				
+/* Grab a packet */
 		while((Res = pcap_next_ex(handle, &header, &packet))>=0){
 		/* Print its length */
 		int i=0;
@@ -95,8 +112,8 @@
 			port+=(int)*(packet+i);
 		printf("%-10d",port);
 		j=38;
-		for(i=j; i<(header->len); i++)
-		//for(i=j; i<10; i++)
+		//for(i=j; i<(header->len); i++)
+		for(i=j; i<10; i++)
 			printf("%c", *(packet+i));
 		printf("\n");
 		/* And close the session */
