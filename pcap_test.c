@@ -26,7 +26,7 @@ typedef struct data
 		const u_char *packet;		/* The actual packet */
 		int Res;
 		
-		int cnt=1;
+		int cnt=0;
 		char dot='.';
 		/* Define the device */
 		dev = pcap_lookupdev(errbuf);
@@ -62,8 +62,11 @@ printf("%-3s\t%-17s\t%-17s\t%-15s\t%-15s\t%-10s\t%-10s\t%-10s\n","num","eth_smac
 		/* Print its length */
 		int i=0;
 		int j=0;
-		data p;
+		
+			
 		if(Res==0)
+			continue;
+		if(*(packet+23)!=0x6||(*(packet+12)!=0x8&&*(packet+13)!=0x0))
 			continue;
 		
 		printf("%-3d\t",cnt);
@@ -110,14 +113,15 @@ printf("%-3s\t%-17s\t%-17s\t%-15s\t%-15s\t%-10s\t%-10s\t%-10s\n","num","eth_smac
 			port+=(int)*(packet+i)*16*16;
 		else
 			port+=(int)*(packet+i);
-		printf("%-10d",port);
-		j=38;
-		for(i=j; i<(header->len); i++)
-		//for(i=j; i<10; i++)
+		printf("%-10d\t",port);
+		j=54;
+		//for(i=j; i<(header->len); i++)
+		for(i=j; i<j+21; i++)
 			printf("%c", *(packet+i));
 		printf("\n");
 		/* And close the session */
-		if(cnt==10)break;
+		if(cnt==10)
+			break;
 }
 		pcap_close(handle);
 		return(0);
