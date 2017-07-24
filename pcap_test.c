@@ -1,18 +1,12 @@
 #include <pcap.h>
 #include <stdio.h>
 #include <string.h>
-
-typedef struct data
-{
-	char eth_smac[20];
-	char eth_dmac[20];
-	char ip_sip[20];
-	char ip_dip[20];
-	char tcp_sport[20];
-	char tcp_dport[20];
-	char data[200];
-
-}data;
+#include<net/ethernet.h>
+#include<netinet/ip.h>
+#include<netinet/tcp.h>
+#include<arpa/inet.h>
+#include<netinet/in.h>
+#include"print_info.h"
 	 int main(int argc, char *argv[])
 	 {
 		pcap_t *handle;			/* Session handle */
@@ -55,74 +49,23 @@ typedef struct data
 			fprintf(stderr, "Couldn't install filter %s: %s\n", filter_exp, pcap_geterr(handle));
 			return(2);
 		}
-printf("%-3s\t%-17s\t%-17s\t%-15s\t%-15s\t%-10s\t%-10s\t%-10s\n","num","eth_smac","eth_dmac","ip_sip","ip_dip","tcp_sport","tcp_dport","data");
 				
 /* Grab a packet */
+
 		while((Res = pcap_next_ex(handle, &header, &packet))>=0){
 		/* Print its length */
-		int i=0;
-		int j=0;
-		
+		cnt++;
+		printf("\n%03d===============================\n",cnt);
 			
 		if(Res==0)
 			continue;
 		if(*(packet+23)!=0x6||(*(packet+12)!=0x8&&*(packet+13)!=0x0))
 			continue;
-		
-		printf("%-3d\t",cnt);
-		cnt++;
-		for(i=0; i<6; i++){
-			printf("%02x ", *(packet+i));
-			//sprintf(p.eth_smac+(2*i), "%02x ",*(packet+i));		
-			//p.eth_smac[i]=*(packet+i);
+		print_ip((void*)(packet+sizeof(struct ether_header)));
+		print_eht((void*)packet);
+		print_tcp((void*)(packet+sizeof(struct ether_header)+sizeof(struct iphdr)));
 		}
-		//printf("%s", p.eth_smac);
-		printf("\t");
-		for(;i<12; i++){
-			printf("%02x ", *(packet+i));
-			//sprintf(p.eth_dmac+(2*(i-6)), "%02x ",*(packet+i));		
-		}
-		//printf("%s", p.eth_dmac);
-		
-		j=26;
-		printf("\t");
-		for(i=j; i<j+4;i++)
-		{
-			printf("%03d", *(packet+i));
-			if(i<j+3) printf(".");
-		}printf("\t");
-		
-		j=30;
-		for(i=j; i<j+4;i++)
-		{
-			printf("%03d", *(packet+i));
-			if(i<j+3) printf(".");}
-		printf("\t");
-		j=34;
-		int port=0;
-		for(i=j; i<j+2; i++)
-		if(i==j)
-			port+=(int)*(packet+i)*16*16;
-		else
-			port+=(int)*(packet+i);
-		printf("%-10d\t",port);
-		j=36;
-		port=0;
-		for(i=j; i<j+2; i++)
-			if(i==j)
-			port+=(int)*(packet+i)*16*16;
-		else
-			port+=(int)*(packet+i);
-		printf("%-10d\t",port);
-		j=54;
-		//for(i=j; i<(header->len); i++)
-		for(i=j; i<j+21; i++)
-			printf("%c", *(packet+i));
-		printf("\n");
-		/* And close the session */
-		if(cnt==10)
-			break;
-}
 		pcap_close(handle);
 		return(0);
 	 }
+
